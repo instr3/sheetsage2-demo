@@ -58,10 +58,21 @@
         .demo-header {
             font-size: 1.3em;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #2c3e50;
             border-bottom: 2px solid #3498db;
             padding-bottom: 10px;
+        }
+        
+        .demo-description {
+            font-size: 1em;
+            color: #555;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+            line-height: 1.6;
         }
         
         .model-selector {
@@ -214,16 +225,58 @@
     <div id="header">
         <h1>SheetSage2 - Melody Transcription Demo</h1>
         <p class="description">
-            This page demonstrates the melody transcription results from different SheetSage models.
-            Each demo allows you to compare the original audio with the synthesized transcription results.
+            Project by M-A-P (Multimodal Art Projection) & Music X Lab
         </p>
+        <p class="description">
+            <strong>Sheetsage 2 V0.1 Descriptions:</strong>
+        </p>
+        <ul style="margin-left: 40px; margin-bottom: 10px;">
+            <li>Sheetsage2 的目标是改善Sheetsage 1的性能。Sheetsage 1在Leadsheet数据集以外的表现并不理想（特别是全曲转录以及和弦识别方面）。</li>
+            <li>Sheetsage2 采用自监督 + 微调的方法训练一个Encoder-Decoder Transformer。监督微调所用到的数据为扩充+清洗后的Leadsheet dataset + Pop909。</li>
+            <li>Sheetsage2 现在支持的内容：(1) 人声主旋律; (2) （人声+非人声）主旋律; (3) 和弦（三/七和弦为主）; (4) Downbeat和简单meter (3/4拍)。</li>
+            <li>Sheetsage2 尚不支持的，但希望支持的内容：(1) 调性识别+变调识别；(2) 变拍号处理；（3）变速处理。</li>
+        </ul>
+        <p class="description">
+            <strong>Performance:</strong> on RWC Pop dataset (melody only, ignoring octave errors, ignoring offsets):
+        </p>
+        <style type="text/css">
+        .tg  {border-collapse:collapse;border-spacing:0;}
+        .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+          overflow:hidden;padding:10px 5px;word-break:normal;}
+        .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+          font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+        .tg .tg-0lax{text-align:left;vertical-align:top}
+        </style>
+        <table class="tg"><thead>
+          <tr>
+            <th class="tg-0lax"></th>
+            <th class="tg-0lax">Precision</th>
+            <th class="tg-0lax">Recall</th>
+            <th class="tg-0lax">F1</th>
+          </tr></thead>
+        <tbody>
+          <tr>
+            <td class="tg-0lax">Sheetsage 1</td>
+            <td class="tg-0lax">0.5768</td>
+            <td class="tg-0lax">0.7145</td>
+            <td class="tg-0lax">0.6334</td>
+          </tr>
+          <tr>
+            <td class="tg-0lax">Sheetsage 2 V0.1</td>
+            <td class="tg-0lax">0.7683</td>
+            <td class="tg-0lax">0.7611</td>
+            <td class="tg-0lax">0.7631</td>
+          </tr>
+        </tbody>
+        </table>
+        <br/>
         <p class="description">
             <strong>Models:</strong>
         </p>
         <ul style="margin-left: 40px; margin-bottom: 10px;">
             <li><strong>SheetSage1:</strong> Original melody transcription model</li>
-            <li><strong>SheetSage2 Vocal:</strong> Improved model trained specifically on vocal melodies</li>
-            <li><strong>SheetSage2 FullBand:</strong> Improved model trained on full band arrangements</li>
+            <li><strong>SheetSage2 Vocal:</strong> Sheetsage2 vocal mode: targeted specifically on vocal melodies <b style="color: red">(RECOMMENDED)</b> </li>
+            <li><strong>SheetSage2 FullBand:</strong> Sheetsage2 full-band mode: transcribing both vocal melody and instrumental main melody <b style="color: red">(may result in more octave errors)</b></li>
         </ul>
         <p class="description">
             Use the <strong>crossfade</strong> slider to blend between the original audio (left) and the transcription (right).
@@ -357,21 +410,21 @@
             }
         }
 
-        // Audio files list
+        // Audio files list with descriptions
         const audioFiles = [
-            '000.mp3',
-            '001.mp3',
-            '002.mp3',
-            '003.mp3',
-            '004.mp3',
-            '小城故事MV.mp3',
-            '朴树-那些花儿.mp3',
-            '李玉刚_石头-雨花石(热门推荐)-国语-情歌对唱.mp3',
-            '流浪地球.mp3',
-            '白桦林 - 朴树.mp3',
-            '舞娘.mp3',
-            '花儿纳吉.mp3',
-            '谢天笑-那不是我.mp3'
+            { filename: '白桦林 - 朴树.mp3', description: '成功案例，3/4拍的例子' },
+            { filename: '舞娘.mp3', description: '成功案例，民族调性的例子' },
+            { filename: '谢天笑-那不是我.mp3', description: '成功案例：简单例子' },
+            { filename: '001.mp3', description: '来自RWC Pop（纯测试集，没有任何split参与训练），成功样例' },
+            { filename: '002.mp3', description: '来自RWC Pop（纯测试集，没有任何split参与训练），成功样例' },
+            { filename: '003.mp3', description: '来自RWC Pop（纯测试集，没有任何split参与训练），成功样例' },
+            { filename: '000.mp3', description: '失败案例（困难）：这个vocal part很难转录（对所有模型都很难）' },
+            { filename: '004.mp3', description: '失败案例，歌手故意唱跑调，有很多音差了半个音高' },
+            { filename: '小城故事MV.mp3', description: '失败案例（待修复）：因为downbeat和melody的相对偏差导致melody总是慢了1/16音符，需要下一版本修复' },
+            { filename: '朴树-那些花儿.mp3', description: '失败案例（困难）：这首歌的beat非常难以提准（对所有模型都很难）' },
+            { filename: '李玉刚_石头-雨花石(热门推荐)-国语-情歌对唱.mp3', description: '失败案例（困难）：这首歌的vocal range不同寻常，导致vocal模型recall低（同时节拍也有不一致问题）' },
+            { filename: '花儿纳吉.mp3', description: '失败案例（困难）：前面还好，后面变速的时候和弦和节拍的起始位置都有点跟丢' },
+            { filename: '流浪地球.mp3', description: '失败案例（待修复）：中间有不规则节拍/变速，导致后面重拍位置错误' },
         ];
 
         const models = [
@@ -389,7 +442,7 @@
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
 
-        function createDemoItem(audioFile, index) {
+        function createDemoItem(fileObj, index) {
             const demoId = `demo-${index}`;
             const container = document.createElement('div');
             container.className = 'demo-item';
@@ -398,8 +451,16 @@
             // Header with filename
             const header = document.createElement('div');
             header.className = 'demo-header';
-            header.textContent = audioFile;
+            header.textContent = fileObj.filename;
             container.appendChild(header);
+            
+            // Description (if provided)
+            if (fileObj.description) {
+                const description = document.createElement('div');
+                description.className = 'demo-description';
+                description.textContent = fileObj.description;
+                container.appendChild(description);
+            }
             
             // Model selector
             const modelSelector = document.createElement('div');
@@ -425,7 +486,7 @@
                 
                 radio.addEventListener('change', () => {
                     if (radio.checked) {
-                        loadDemo(demoId, audioFile, model.folder);
+                        loadDemo(demoId, fileObj.filename, model.folder);
                     }
                 });
             });
@@ -671,8 +732,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             const bodyEl = document.getElementById('body');
             
-            audioFiles.forEach((audioFile, index) => {
-                const demoItem = createDemoItem(audioFile, index);
+            audioFiles.forEach((fileObj, index) => {
+                const demoItem = createDemoItem(fileObj, index);
                 bodyEl.appendChild(demoItem);
             });
         });
