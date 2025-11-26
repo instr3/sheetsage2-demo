@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SheetSage2 - Melody Transcription Demo</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        #header {
+            max-width: 1200px;
+            margin: 0 auto 40px;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .description {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        #body {
+            max-width: 1200px;
+            margin: 0 auto;
+            margin-bottom: 200px;
+        }
+        
+        .demo-item {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .demo-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .model-selector {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .model-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .model-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .model-option label {
+            font-size: 1.1em;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .player-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .controls-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+        
+        .controls-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .control-label {
+            min-width: 100px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .control-input {
+            flex: 1;
+            max-width: 600px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #d3d3d3;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #3498db;
+            color: white;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .status-text {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-left: 10px;
+        }
+        
+        .model-unavailable {
+            color: #e74c3c;
+        }
+        
+        .time-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            color: #2c3e50;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .model-selector {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .controls-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .control-label {
+                min-width: auto;
+            }
+        }
+    </style>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+</head>
+<body>
+    <div id="header">
+        <h1>SheetSage2 - Melody Transcription Demo</h1>
+        <p class="description">
+            This page demonstrates the melody transcription results from different SheetSage models.
+            Each demo allows you to compare the original audio with the synthesized transcription results.
+        </p>
+        <p class="description">
+            <strong>Models:</strong>
+        </p>
+        <ul style="margin-left: 40px; margin-bottom: 10px;">
+            <li><strong>SheetSage1:</strong> Original melody transcription model</li>
+            <li><strong>SheetSage2 Vocal:</strong> Improved model trained specifically on vocal melodies</li>
+            <li><strong>SheetSage2 FullBand:</strong> Improved model trained on full band arrangements</li>
+        </ul>
+        <p class="description">
+            Use the <strong>crossfade</strong> slider to blend between the original audio (left) and the transcription (right).
+        </p>
+    </div>
+
+    <div id="body">
+        <!-- Demo items will be inserted here by JavaScript -->
+    </div>
+
+    <script>
+        // XfadePlayer class adapted from the reference implementation
+        class XfadePlayer {
+            constructor() {
+                this.playerA = new Tone.Player();
+                this.playerB = new Tone.Player();
+                this.xfade = new Tone.CrossFade(0.5);
+                this.volume = new Tone.Volume(0);
+                
+                this.playerA.connect(this.xfade.a);
+                this.playerB.connect(this.xfade.b);
+                this.xfade.connect(this.volume);
+                this.volume.toDestination();
+                
+                this.transport = null;
+                this.updateInterval = null;
+            }
+            
+            async setSources(a, b) {
+                this.stop();
+                try {
+                    // Fetch the audio files as blobs to avoid URL encoding issues
+                    const [blobA, blobB] = await Promise.all([
+                        fetch(a).then(r => r.blob()),
+                        fetch(b).then(r => r.blob())
+                    ]);
+                    
+                    // Create object URLs from blobs
+                    const urlA = URL.createObjectURL(blobA);
+                    const urlB = URL.createObjectURL(blobB);
+                    
+                    // Load the object URLs into Tone players
+                    await Promise.all([
+                        this.playerA.load(urlA),
+                        this.playerB.load(urlB)
+                    ]);
+                    
+                    this.transport = {
+                        startedAt: null,
+                        lastKnownOffset: 0,
+                        duration: Math.max(
+                            this.playerA.buffer.duration,
+                            this.playerB.buffer.duration
+                        )
+                    };
+                    return true;
+                } catch (err) {
+                    console.error('Failed to load sources:', err);
+                    this.transport = null;
+                    return false;
+                }
+            }
+            
+            play() {
+                if (!this.transport) return;
+                if (Tone.context.state !== 'running') Tone.context.resume();
+                
+                const now = Tone.now();
+                this.playerA.start(now, this.transport.lastKnownOffset);
+                this.playerB.start(now, this.transport.lastKnownOffset);
+                this.transport.startedAt = now;
+            }
+            
+            pause() {
+                if (!this.transport) return;
+                this.playerA.stop();
+                this.playerB.stop();
+                const offset = this.getTransportOffset();
+                this.transport.startedAt = null;
+                this.transport.lastKnownOffset = offset;
+            }
+            
+            stop() {
+                if (!this.transport) return;
+                this.playerA.stop();
+                this.playerB.stop();
+                this.transport.startedAt = null;
+                this.transport.lastKnownOffset = 0;
+            }
+            
+            getTransportOffset() {
+                if (!this.transport) return 0;
+                let offset = this.transport.lastKnownOffset;
+                if (this.transport.startedAt !== null) {
+                    offset += Tone.now() - this.transport.startedAt;
+                }
+                return offset;
+            }
+            
+            setTransportOffset(offset) {
+                if (!this.transport) return;
+                const wasPlaying = this.transport.startedAt !== null;
+                if (wasPlaying) {
+                    this.pause();
+                }
+                this.transport.lastKnownOffset = offset;
+                if (wasPlaying) {
+                    this.play();
+                }
+            }
+            
+            setXfade(value) {
+                this.xfade.fade.rampTo(value, 0.1);
+            }
+            
+            setVolume(value) {
+                if (value <= 0) {
+                    this.volume.mute = true;
+                } else {
+                    this.volume.mute = false;
+                    this.volume.volume.rampTo((Math.min(value, 1) - 1) * 33, 0.1);
+                }
+            }
+            
+            isPlaying() {
+                return this.transport && this.transport.startedAt !== null;
+            }
+            
+            getDuration() {
+                return this.transport ? this.transport.duration : 0;
+            }
+        }
+
+        // Audio files list
+        const audioFiles = [
+            '000.mp3',
+            '001.mp3',
+            '002.mp3',
+            '003.mp3',
+            '004.mp3',
+            '小城故事MV.mp3',
+            '朴树-那些花儿.mp3',
+            '李玉刚_石头-雨花石(热门推荐)-国语-情歌对唱.mp3',
+            '流浪地球.mp3',
+            '白桦林 - 朴树.mp3',
+            '舞娘.mp3',
+            '花儿纳吉.mp3',
+            '谢天笑-那不是我.mp3'
+        ];
+
+        const models = [
+            { id: 'sheetsage1', label: 'SheetSage1', folder: 'sheetsage1' },
+            { id: 'sheetsage2_vocal', label: 'SheetSage2 Vocal', folder: 'sheetsage2_vocal' },
+            { id: 'sheetsage2_fullband', label: 'SheetSage2 FullBand', folder: 'sheetsage2_fullband' }
+        ];
+
+        let currentPlayer = null;
+        let currentDemoId = null;
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function createDemoItem(audioFile, index) {
+            const demoId = `demo-${index}`;
+            const container = document.createElement('div');
+            container.className = 'demo-item';
+            container.id = demoId;
+            
+            // Header with filename
+            const header = document.createElement('div');
+            header.className = 'demo-header';
+            header.textContent = audioFile;
+            container.appendChild(header);
+            
+            // Model selector
+            const modelSelector = document.createElement('div');
+            modelSelector.className = 'model-selector';
+            
+            models.forEach(model => {
+                const option = document.createElement('div');
+                option.className = 'model-option';
+                
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = `model-${demoId}`;
+                radio.id = `${demoId}-${model.id}`;
+                radio.value = model.id;
+                
+                const label = document.createElement('label');
+                label.htmlFor = radio.id;
+                label.textContent = model.label;
+                
+                option.appendChild(radio);
+                option.appendChild(label);
+                modelSelector.appendChild(option);
+                
+                radio.addEventListener('change', () => {
+                    if (radio.checked) {
+                        loadDemo(demoId, audioFile, model.folder);
+                    }
+                });
+            });
+            
+            container.appendChild(modelSelector);
+            
+            // Player container
+            const playerContainer = document.createElement('div');
+            playerContainer.className = 'player-container';
+            playerContainer.id = `${demoId}-player`;
+            
+            // Play/Pause buttons
+            const controlsRow1 = document.createElement('div');
+            controlsRow1.className = 'controls-row';
+            
+            const buttonGroup = document.createElement('div');
+            buttonGroup.className = 'button-group';
+            
+            const playBtn = document.createElement('button');
+            playBtn.textContent = '▶ Play';
+            playBtn.id = `${demoId}-play`;
+            playBtn.disabled = true;
+            
+            const pauseBtn = document.createElement('button');
+            pauseBtn.textContent = '⏸ Pause';
+            pauseBtn.id = `${demoId}-pause`;
+            pauseBtn.disabled = true;
+            
+            const stopBtn = document.createElement('button');
+            stopBtn.textContent = '⏹ Stop';
+            stopBtn.id = `${demoId}-stop`;
+            stopBtn.disabled = true;
+            
+            buttonGroup.appendChild(playBtn);
+            buttonGroup.appendChild(pauseBtn);
+            buttonGroup.appendChild(stopBtn);
+            
+            const timeDisplay = document.createElement('div');
+            timeDisplay.className = 'time-display';
+            timeDisplay.id = `${demoId}-time`;
+            timeDisplay.textContent = '0:00 / 0:00';
+            
+            const statusText = document.createElement('span');
+            statusText.className = 'status-text';
+            statusText.id = `${demoId}-status`;
+            statusText.textContent = 'Select a model to begin';
+            
+            controlsRow1.appendChild(buttonGroup);
+            controlsRow1.appendChild(timeDisplay);
+            controlsRow1.appendChild(statusText);
+            playerContainer.appendChild(controlsRow1);
+            
+            // Progress slider
+            const controlsRow2 = document.createElement('div');
+            controlsRow2.className = 'controls-row';
+            
+            const progressLabel = document.createElement('div');
+            progressLabel.className = 'control-label';
+            progressLabel.textContent = 'Progress';
+            
+            const progressInput = document.createElement('input');
+            progressInput.type = 'range';
+            progressInput.className = 'control-input';
+            progressInput.id = `${demoId}-progress`;
+            progressInput.min = '0';
+            progressInput.max = '1000';
+            progressInput.value = '0';
+            progressInput.disabled = true;
+            
+            controlsRow2.appendChild(progressLabel);
+            controlsRow2.appendChild(progressInput);
+            playerContainer.appendChild(controlsRow2);
+            
+            // Crossfade slider
+            const controlsRow3 = document.createElement('div');
+            controlsRow3.className = 'controls-row';
+            
+            const xfadeLabel = document.createElement('div');
+            xfadeLabel.className = 'control-label';
+            xfadeLabel.textContent = 'Crossfade';
+            
+            const xfadeInput = document.createElement('input');
+            xfadeInput.type = 'range';
+            xfadeInput.className = 'control-input';
+            xfadeInput.id = `${demoId}-xfade`;
+            xfadeInput.min = '0';
+            xfadeInput.max = '1000';
+            xfadeInput.value = '500';
+            
+            const xfadeIndicator = document.createElement('span');
+            xfadeIndicator.style.marginLeft = '10px';
+            xfadeIndicator.style.minWidth = '100px';
+            xfadeIndicator.textContent = '← Original | Transcription →';
+            
+            controlsRow3.appendChild(xfadeLabel);
+            controlsRow3.appendChild(xfadeInput);
+            controlsRow3.appendChild(xfadeIndicator);
+            playerContainer.appendChild(controlsRow3);
+            
+            // Volume slider
+            const controlsRow4 = document.createElement('div');
+            controlsRow4.className = 'controls-row';
+            
+            const volumeLabel = document.createElement('div');
+            volumeLabel.className = 'control-label';
+            volumeLabel.textContent = 'Volume';
+            
+            const volumeInput = document.createElement('input');
+            volumeInput.type = 'range';
+            volumeInput.className = 'control-input';
+            volumeInput.id = `${demoId}-volume`;
+            volumeInput.min = '0';
+            volumeInput.max = '1000';
+            volumeInput.value = '750';
+            
+            controlsRow4.appendChild(volumeLabel);
+            controlsRow4.appendChild(volumeInput);
+            playerContainer.appendChild(controlsRow4);
+            
+            container.appendChild(playerContainer);
+            
+            // Event listeners
+            playBtn.addEventListener('click', () => {
+                if (currentPlayer && currentDemoId === demoId) {
+                    currentPlayer.play();
+                }
+            });
+            
+            pauseBtn.addEventListener('click', () => {
+                if (currentPlayer && currentDemoId === demoId) {
+                    currentPlayer.pause();
+                }
+            });
+            
+            stopBtn.addEventListener('click', () => {
+                if (currentPlayer && currentDemoId === demoId) {
+                    currentPlayer.stop();
+                }
+            });
+            
+            progressInput.addEventListener('input', () => {
+                if (currentPlayer && currentDemoId === demoId) {
+                    const offset = (progressInput.value / 1000) * currentPlayer.getDuration();
+                    currentPlayer.setTransportOffset(offset);
+                }
+            });
+            
+            xfadeInput.addEventListener('input', () => {
+                if (currentPlayer && currentDemoId === demoId) {
+                    currentPlayer.setXfade(xfadeInput.value / 1000);
+                }
+            });
+            
+            volumeInput.addEventListener('input', () => {
+                if (currentPlayer && currentDemoId === demoId) {
+                    currentPlayer.setVolume(volumeInput.value / 1000);
+                }
+            });
+            
+            return container;
+        }
+
+        async function loadDemo(demoId, audioFile, modelFolder) {
+            const statusEl = document.getElementById(`${demoId}-status`);
+            const playBtn = document.getElementById(`${demoId}-play`);
+            const pauseBtn = document.getElementById(`${demoId}-pause`);
+            const stopBtn = document.getElementById(`${demoId}-stop`);
+            const progressEl = document.getElementById(`${demoId}-progress`);
+            
+            // Stop current player if any
+            if (currentPlayer) {
+                currentPlayer.stop();
+            }
+            
+            statusEl.textContent = 'Loading...';
+            playBtn.disabled = true;
+            pauseBtn.disabled = true;
+            stopBtn.disabled = true;
+            progressEl.disabled = true;
+            
+            // Create new player
+            currentPlayer = new XfadePlayer();
+            currentDemoId = demoId;
+            
+            // Set initial values
+            const xfadeEl = document.getElementById(`${demoId}-xfade`);
+            const volumeEl = document.getElementById(`${demoId}-volume`);
+            currentPlayer.setXfade(xfadeEl.value / 1000);
+            currentPlayer.setVolume(volumeEl.value / 1000);
+            
+            // Load audio
+            // Don't use encodeURIComponent - let the browser handle URL encoding naturally
+            const inputPath = `audio/input/${audioFile}`;
+            const outputPath = `audio/${modelFolder}/${audioFile}`;
+            
+            const loaded = await currentPlayer.setSources(inputPath, outputPath);
+            
+            if (loaded) {
+                statusEl.textContent = 'Ready to play';
+                statusEl.classList.remove('model-unavailable');
+                playBtn.disabled = false;
+                pauseBtn.disabled = false;
+                stopBtn.disabled = false;
+                progressEl.disabled = false;
+                
+                // Start update loop
+                updatePlayerUI(demoId);
+            } else {
+                statusEl.textContent = 'Failed to load (model output may not be available yet)';
+                statusEl.classList.add('model-unavailable');
+                currentPlayer = null;
+                currentDemoId = null;
+            }
+        }
+
+        function updatePlayerUI(demoId) {
+            if (currentDemoId !== demoId || !currentPlayer) return;
+            
+            const progressEl = document.getElementById(`${demoId}-progress`);
+            const timeEl = document.getElementById(`${demoId}-time`);
+            
+            const offset = currentPlayer.getTransportOffset();
+            const duration = currentPlayer.getDuration();
+            
+            if (duration > 0) {
+                progressEl.value = (offset / duration) * 1000;
+                timeEl.textContent = `${formatTime(offset)} / ${formatTime(duration)}`;
+            }
+            
+            if (currentPlayer.isPlaying() && offset < duration) {
+                requestAnimationFrame(() => updatePlayerUI(demoId));
+            } else if (offset >= duration) {
+                currentPlayer.stop();
+            }
+            
+            // Continue updating even when paused (for manual seeking)
+            if (!currentPlayer.isPlaying()) {
+                setTimeout(() => updatePlayerUI(demoId), 100);
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            const bodyEl = document.getElementById('body');
+            
+            audioFiles.forEach((audioFile, index) => {
+                const demoItem = createDemoItem(audioFile, index);
+                bodyEl.appendChild(demoItem);
+            });
+        });
+    </script>
+</body>
+</html>
+
