@@ -234,7 +234,13 @@
             <li>Sheetsage2 的目标是改善Sheetsage 1的性能。Sheetsage 1在Leadsheet数据集以外的表现并不理想（特别是全曲转录以及和弦识别方面）。</li>
             <li>Sheetsage2 采用自监督 + 微调的方法训练一个Encoder-Decoder Transformer。监督微调所用到的数据为扩充+清洗后的Leadsheet dataset + Pop909。</li>
             <li>Sheetsage2 现在支持的内容：(1) 人声主旋律; (2) （人声+非人声）主旋律; (3) 和弦（三/七和弦为主）; (4) Downbeat和简单meter (3/4拍)。</li>
+        </ul>
+        <p class="description">
+            <strong>Sheetsage 2 V0.2 Descriptions:</strong>
+        </p>
+        <ul style="margin-left: 40px; margin-bottom: 10px;">
             <li>Sheetsage2 V0.2支持了如下内容：(1) 调性识别+变调识别；(2) 变拍号处理。</li>
+            <li>和弦和节拍的准确率都变好了。</li>
         </ul>
         <p class="description">
             <strong>Performance:</strong> on RWC Pop dataset (melody only, ignoring octave errors, ignoring offsets):
