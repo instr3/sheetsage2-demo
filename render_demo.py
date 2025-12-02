@@ -43,9 +43,9 @@ def render_midi_to_mp3(midi_file, mp3_file, sr=44100):
 
 
 def render_all_sheetsage2():
-    midi_path = r'../llama_music/temp/transcriptions'
+    midi_path = r'../llama_music/temp/transcriptions2'
     for suffix in ['fullband', 'vocal']:
-        output_folder = os.path.join(OUTPUT_PATH, 'sheetsage2_' + suffix)
+        output_folder = os.path.join(OUTPUT_PATH, 'sheetsage2_V0.2_' + suffix)
         os.makedirs(output_folder, exist_ok=True)
         for file in os.listdir(midi_path):
             if file.endswith(f'_{suffix}.mid'):
@@ -60,5 +60,5 @@ def render_all_sheetsage():
             render_midi_to_mp3(os.path.join(midi_path, file), os.path.join(output_folder, file.replace(f'.mp3.mid', '.mp3')))
 
 if __name__ == '__main__':
-    render_all_sheetsage()
+    # render_all_sheetsage()
     render_all_sheetsage2()
