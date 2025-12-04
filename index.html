@@ -231,16 +231,16 @@
             <strong>Sheetsage 2 V0.1 Descriptions:</strong>
         </p>
         <ul style="margin-left: 40px; margin-bottom: 10px;">
-            <li>Sheetsage2 的目标是改善Sheetsage 1的性能。Sheetsage 1在Leadsheet数据集以外的表现并不理想（特别是全曲转录以及和弦识别方面）。</li>
-            <li>Sheetsage2 采用自监督 + 微调的方法训练一个Encoder-Decoder Transformer。监督微调所用到的数据为扩充+清洗后的Leadsheet dataset + Pop909。</li>
-            <li>Sheetsage2 现在支持的内容：(1) 人声主旋律; (2) （人声+非人声）主旋律; (3) 和弦（三/七和弦为主）; (4) Downbeat和简单meter (3/4拍)。</li>
+            <li>The goal of Sheetsage2 is to improve the performance of Sheetsage1. <a href="https://chrisdonahue.com/sheetsage/">Sheetsage1</a> performs well on 30s snippets in the <a href="https://github.com/chrisdonahue/sheetsage">LeadSheet dataset</a>, but lacks generalizability especially in full-song transcription and chord recognition.</li>
+            <li>Sheetsage2 trains an encoder–decoder Transformer using a self-supervised + fine-tuning approach. The supervised fine-tuning data consist of an augmented and cleaned Leadsheet dataset combined with Pop909.<</li>
+            <li>Sheetsage2 currently supports: (1) vocal melody; (2) (vocal + non-vocal) main melody; (3) chords (mainly triads and seventh chords); (4) downbeats and simple meters (e.g., 3/4); (5) ABC format export.</li>
         </ul>
         <p class="description">
             <strong>Sheetsage 2 V0.2 Descriptions:</strong>
         </p>
         <ul style="margin-left: 40px; margin-bottom: 10px;">
-            <li>Sheetsage2 V0.2支持了如下内容：(1) 调性识别+变调识别；(2) 变拍号处理。</li>
-            <li>和弦和节拍的准确率都变好了。</li>
+            <li>Sheetsage2 V0.2 adds support for: (1) key detection and modulation detection; (2) variable time signatures.</li>
+            <li>Accuracy for both chords and meter has improved.</li>
         </ul>
         <p class="description">
             <strong>Performance:</strong> on RWC Pop dataset (melody only, ignoring octave errors, ignoring offsets):
@@ -418,19 +418,19 @@
 
         // Audio files list with descriptions
         const audioFiles = [
-            { filename: '白桦林 - 朴树.mp3', description: '成功案例，3/4拍的例子' },
-            { filename: '舞娘.mp3', description: '成功案例，民族调性的例子' },
-            { filename: '谢天笑-那不是我.mp3', description: '成功案例：简单例子' },
-            { filename: '001.mp3', description: '来自RWC Pop（纯测试集，没有任何split参与训练），成功样例' },
-            { filename: '002.mp3', description: '来自RWC Pop（纯测试集，没有任何split参与训练），成功样例' },
-            { filename: '003.mp3', description: '来自RWC Pop（纯测试集，没有任何split参与训练），成功样例' },
-            { filename: '小城故事MV.mp3', description: '更新案例（V0.2已修复）：V0.2的downbeat的相对偏差相比于V0.1已经修复' },
-            { filename: '朴树-那些花儿.mp3', description: '更新案例（V0.2已修复）：V0.2的downbeat准确率比V0.1高非常多' },
-            { filename: '000.mp3', description: '失败案例（困难）：这个vocal part很难转录（对所有模型都很难）' },
-            { filename: '004.mp3', description: '失败案例，歌手故意唱跑调，有很多音差了半个音高' },
-            { filename: '李玉刚_石头-雨花石(热门推荐)-国语-情歌对唱.mp3', description: '失败案例（困难）：这首歌的vocal range不同寻常，导致vocal模型recall低（同时节拍也有不一致问题）' },
-            { filename: '花儿纳吉.mp3', description: '失败案例（困难）：前面还好，后面变速的时候和弦和节拍的起始位置都有点跟丢' },
-            { filename: '流浪地球.mp3', description: '失败案例（待修复）：中间有不规则节拍/变速，导致后面重拍位置错误' },
+            { filename: '白桦林 - 朴树.mp3', description: '🍒 Good example: 3/4 meter' },
+            { filename: '舞娘.mp3', description: '🍒 Good example: ethnic mode' },
+            { filename: '谢天笑-那不是我.mp3', description: '🍒 Good example: a simple example that Sheetsage 1 also works relatively well' },
+            { filename: '001.mp3', description: '🍒 Good example (from RWC Pop, pure test set)' },
+            { filename: '002.mp3', description: '🍒 Good example (from RWC Pop, pure test set)' },
+            { filename: '003.mp3', description: '🍒 Good example (from RWC Pop, pure test set)' },
+            { filename: '小城故事MV.mp3', description: '🍋 -> 🍒 Improved example：V0.2 performs better compared to V0.1 on downbeats' },
+            { filename: '朴树-那些花儿.mp3', description: '🍋 -> 🍒 Improved example：V0.2 performs better compared to V0.1 on downbeats' },
+            { filename: '000.mp3', description: '🍋 Bad example (from RWC Pop, pure test set): hard singing voice transcription (due to off-tune notes)' },
+            { filename: '004.mp3', description: '🍋 Bad example (from RWC Pop, pure test set): hard singing voice transcription (due to off-tune notes)' },
+            { filename: '李玉刚_石头-雨花石(热门推荐)-国语-情歌对唱.mp3', description: '🍋 Bad example (from RWC Pop, pure test set): extreme voice range - low voice recall' },
+            { filename: '花儿纳吉.mp3', description: '🍋 -> 🍒 Improved example：V0.2 performs better compared to V0.1 on downbeats' },
+            { filename: '流浪地球.mp3', description: '🍋 Bad example (from RWC Pop, pure test set): inconsistent tempo' },
         ];
 
         const models = [
