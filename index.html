@@ -182,6 +182,42 @@
             background: #95a5a6;
             cursor: not-allowed;
         }
+
+        .dataset-tabs {
+            display: flex;
+            gap: 10px;
+            max-width: 1200px;
+            margin: 0 auto 20px;
+            flex-wrap: wrap;
+        }
+
+        .dataset-tab {
+            background: white;
+            color: #2c3e50;
+            border: 1px solid #d6dde5;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            min-width: 100px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .dataset-tab:hover {
+            background: #eef6fc;
+            color: #2c3e50;
+        }
+
+        .dataset-tab.active {
+            background: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+        }
+
+        .dataset-tab.active:hover {
+            background: #243342;
+            color: white;
+        }
         
         .status-text {
             font-size: 0.9em;
@@ -446,6 +482,50 @@
             { id: 'sheetsage2_v0.4_fullsong', label: 'SheetSage2 V0.4 FullSong', folder: 'sheetsage2_V0.4_fullsong' },
         ];
 
+        const randomAudioFiles = [
+            { filename: '747896.mp3' },
+            { filename: '770507.mp3' },
+            { filename: '759116.mp3' },
+            { filename: '749580.mp3' },
+            { filename: '585098.mp3' },
+            { filename: '734442.mp3' },
+            { filename: '601961.mp3' },
+            { filename: '670673.mp3' },
+            { filename: '593064.mp3' },
+            { filename: '745464.mp3' },
+            { filename: '744475.mp3' },
+            { filename: '713686.mp3' },
+            { filename: '699233.mp3' },
+            { filename: '554934.mp3' },
+            { filename: '698480.mp3' },
+            { filename: '743919.mp3' },
+            { filename: '772046.mp3' },
+            { filename: '592352.mp3' },
+            { filename: '740250.mp3' },
+            { filename: '855342.mp3' },
+        ];
+
+        const randomModels = [
+            { id: 'sheetsage1_hooktheory', label: 'SheetSage1', folder: 'sheetsage1_hooktheory' },
+            { id: 'sheetsage2_v0.4_hooktheory_vocal', label: 'SheetSage2 V0.4 Vocal', folder: 'sheetsage2_V0.4_hooktheory_vocal' },
+            { id: 'sheetsage2_v0.4_hooktheory_fullsong', label: 'SheetSage2 V0.4 FullSong', folder: 'sheetsage2_V0.4_hooktheory_fullsong' },
+        ];
+
+        const demoSets = {
+            random: {
+                label: 'Random',
+                inputFolder: 'input_hooktheory',
+                audioFiles: randomAudioFiles,
+                models: randomModels,
+            },
+            selected: {
+                label: 'Selected',
+                inputFolder: 'input',
+                audioFiles,
+                models,
+            },
+        };
+
         let currentPlayer = null;
         let currentDemoId = null;
 
@@ -455,8 +535,8 @@
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
 
-        function createDemoItem(fileObj, index) {
-            const demoId = `demo-${index}`;
+        function createDemoItem(fileObj, index, setId, inputFolder, modelList) {
+            const demoId = `demo-${setId}-${index}`;
             const container = document.createElement('div');
             container.className = 'demo-item';
             container.id = demoId;
@@ -479,7 +559,7 @@
             const modelSelector = document.createElement('div');
             modelSelector.className = 'model-selector';
             
-            models.forEach(model => {
+            modelList.forEach(model => {
                 const option = document.createElement('div');
                 option.className = 'model-option';
                 
@@ -499,7 +579,7 @@
                 
                 radio.addEventListener('change', () => {
                     if (radio.checked) {
-                        loadDemo(demoId, fileObj.filename, model.folder);
+                        loadDemo(demoId, fileObj.filename, inputFolder, model.folder);
                     }
                 });
             });
@@ -662,7 +742,7 @@
             return container;
         }
 
-        async function loadDemo(demoId, audioFile, modelFolder) {
+        async function loadDemo(demoId, audioFile, inputFolder, modelFolder) {
             const statusEl = document.getElementById(`${demoId}-status`);
             const playBtn = document.getElementById(`${demoId}-play`);
             const pauseBtn = document.getElementById(`${demoId}-pause`);
@@ -692,7 +772,7 @@
             
             // Load audio
             // Don't use encodeURIComponent - let the browser handle URL encoding naturally
-            const inputPath = `audio/input/${audioFile}`;
+            const inputPath = `audio/${inputFolder}/${audioFile}`;
             const outputPath = `audio/${modelFolder}/${audioFile}`;
             
             const loaded = await currentPlayer.setSources(inputPath, outputPath);
@@ -741,14 +821,63 @@
             }
         }
 
+        function stopCurrentPlayer() {
+            if (currentPlayer) {
+                currentPlayer.stop();
+            }
+            currentPlayer = null;
+            currentDemoId = null;
+        }
+
+        function renderDemoSet(setId) {
+            const demoSet = demoSets[setId];
+            const listEl = document.getElementById('demo-list');
+            if (!demoSet || !listEl) return;
+
+            stopCurrentPlayer();
+
+            Object.keys(demoSets).forEach(tabSetId => {
+                const tabEl = document.getElementById(`tab-${tabSetId}`);
+                if (tabEl) {
+                    tabEl.classList.toggle('active', tabSetId === setId);
+                }
+            });
+
+            listEl.innerHTML = '';
+            demoSet.audioFiles.forEach((fileObj, index) => {
+                const demoItem = createDemoItem(
+                    fileObj,
+                    index,
+                    setId,
+                    demoSet.inputFolder,
+                    demoSet.models
+                );
+                listEl.appendChild(demoItem);
+            });
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             const bodyEl = document.getElementById('body');
-            
-            audioFiles.forEach((fileObj, index) => {
-                const demoItem = createDemoItem(fileObj, index);
-                bodyEl.appendChild(demoItem);
+
+            const tabsEl = document.createElement('div');
+            tabsEl.className = 'dataset-tabs';
+
+            Object.entries(demoSets).forEach(([setId, demoSet]) => {
+                const tabEl = document.createElement('button');
+                tabEl.className = 'dataset-tab';
+                tabEl.id = `tab-${setId}`;
+                tabEl.textContent = demoSet.label;
+                tabEl.addEventListener('click', () => renderDemoSet(setId));
+                tabsEl.appendChild(tabEl);
             });
+
+            const listEl = document.createElement('div');
+            listEl.id = 'demo-list';
+
+            bodyEl.appendChild(tabsEl);
+            bodyEl.appendChild(listEl);
+            renderDemoSet('random');
         });
     </script>
 </body>
